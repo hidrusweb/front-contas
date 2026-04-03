@@ -1,12 +1,13 @@
 # Deploy Next.js (out/) → Hostinger via FTP.
 # Repositório: só o contas na raiz (sem pasta hidrus-frontend-contas).
 #
-# Secrets (paridade com deploy-admin do frontend-admin):
-#   HOSTINGER_FTP_HOST = só servidor FTP (IP ou hostname)
-#   HOSTINGER_FTP_REMOTE_PATH_CONTAS = pasta no servidor (com /). Ex.: domains/hidrusweb.com/public_html/contas
-#   Também: HOSTINGER_FTP_USERNAME, HOSTINGER_FTP_PASSWORD
-#   NEXT_PUBLIC_API_URL
-#   NEXT_PUBLIC_BASE_PATH (opcional) = base do site se não for a raiz; ex: /contas
+# Secrets / vars (paridade com deploy-admin):
+#   secrets  HOSTINGER_FTP_HOST, HOSTINGER_FTP_USERNAME, HOSTINGER_FTP_PASSWORD
+#   vars     HOSTINGER_FTP_REMOTE_PATH_CONTAS_DEV  — pasta FTP (branch develop)
+#   vars     HOSTINGER_FTP_REMOTE_PATH_CONTAS_PRD  — pasta FTP (branch main)
+#   vars     NEXT_PUBLIC_API_URL_DEV  — API no build develop
+#   vars     NEXT_PUBLIC_API_URL_PRD  — API no build main
+#   vars     NEXT_PUBLIC_BASE_PATH (opcional) = ex: /contas
 #
 # dangerous-clean-slate: true apaga TUDO nessa pasta remota antes do upload — confirme o caminho.
 
@@ -14,7 +15,7 @@ name: Deploy Contas (Next.js)
 
 on:
   push:
-    branches: [main, master]
+    branches: [develop, main]
     paths-ignore:
       - '**/*.md'
   workflow_dispatch:
@@ -39,10 +40,9 @@ jobs:
           FTP_HOST: ${{ secrets.HOSTINGER_FTP_HOST }}
           FTP_USER: ${{ secrets.HOSTINGER_FTP_USERNAME }}
           FTP_PASS: ${{ secrets.HOSTINGER_FTP_PASSWORD }}
-          FTP_REMOTE: ${{ secrets.HOSTINGER_FTP_REMOTE_PATH_CONTAS }}
         run: |
-          if [ -z "$FTP_HOST" ] || [ -z "$FTP_USER" ] || [ -z "$FTP_PASS" ] || [ -z "$FTP_REMOTE" ]; then
-            echo "::error::Crie em Settings → Secrets → Actions: HOSTINGER_FTP_HOST, HOSTINGER_FTP_USERNAME, HOSTINGER_FTP_PASSWORD, HOSTINGER_FTP_REMOTE_PATH_CONTAS."
+          if [ -z "$FTP_HOST" ] || [ -z "$FTP_USER" ] || [ -z "$FTP_PASS" ]; then
+            echo "::error::Secrets: HOSTINGER_FTP_HOST, HOSTINGER_FTP_USERNAME, HOSTINGER_FTP_PASSWORD."
             exit 1
           fi
           if [[ "$FTP_HOST" == *"://"* ]]; then
@@ -50,9 +50,49 @@ jobs:
             exit 1
           fi
           if [[ "$FTP_HOST" == *"/"* ]]; then
-            echo "::error::HOSTINGER_FTP_HOST não pode ser um caminho. Coloque a pasta em HOSTINGER_FTP_REMOTE_PATH_CONTAS."
+            echo "::error::HOSTINGER_FTP_HOST não pode ser um caminho. Use vars HOSTINGER_FTP_REMOTE_PATH_CONTAS_DEV / _PRD."
             exit 1
           fi
+
+      # main → PRD; develop (e outras) → DEV
+      - name: Pasta remota FTP por branch
+        run: |
+          if [ "${GITHUB_REF_NAME}" = "main" ]; then
+            T="${{ vars.HOSTINGER_FTP_REMOTE_PATH_CONTAS_PRD }}"
+            N="HOSTINGER_FTP_REMOTE_PATH_CONTAS_PRD"
+          else
+            T="${{ vars.HOSTINGER_FTP_REMOTE_PATH_CONTAS_DEV }}"
+            N="HOSTINGER_FTP_REMOTE_PATH_CONTAS_DEV"
+          fi
+          if [ -z "$T" ]; then
+            echo "::error::Defina a var $N (branch: ${GITHUB_REF_NAME})."
+            exit 1
+          fi
+          T=$(printf '%s' "$T" | tr -d '\r' | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')
+          echo "HOSTINGER_FTP_REMOTE_PATH=$T" >> "$GITHUB_ENV"
+          echo "FTP → $T (${GITHUB_REF_NAME})"
+
+      - name: NEXT_PUBLIC_API_URL por branch
+        run: |
+          if [ "${GITHUB_REF_NAME}" = "main" ]; then
+            T="${{ vars.NEXT_PUBLIC_API_URL_PRD }}"
+            N="NEXT_PUBLIC_API_URL_PRD"
+          else
+            T="${{ vars.NEXT_PUBLIC_API_URL_DEV }}"
+            N="NEXT_PUBLIC_API_URL_DEV"
+          fi
+          if [ -z "$T" ]; then
+            echo "::error::Defina a var $N (branch: ${GITHUB_REF_NAME})."
+            exit 1
+          fi
+          T=$(printf '%s' "$T" | tr -d '\r' | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')
+          D=_NEXT_PUBLIC_API_URL_VAL_
+          {
+            echo "NEXT_PUBLIC_API_URL<<$D"
+            printf '%s\n' "$T"
+            echo "$D"
+          } >> "$GITHUB_ENV"
+          echo "NEXT_PUBLIC_API_URL ok (${GITHUB_REF_NAME})"
 
       - name: Setup Node
         uses: actions/setup-node@v4
@@ -72,7 +112,7 @@ jobs:
 
       - name: Install & build
         env:
-          NEXT_PUBLIC_API_URL: ${{ vars.NEXT_PUBLIC_API_URL }}
+          NEXT_PUBLIC_API_URL: ${{ env.NEXT_PUBLIC_API_URL }}
           NEXT_PUBLIC_BASE_PATH: ${{ vars.NEXT_PUBLIC_BASE_PATH }}
         run: |
           npm ci
@@ -89,5 +129,5 @@ jobs:
           security: loose
           timeout: 300000
           local-dir: ./out/
-          server-dir: ${{ secrets.HOSTINGER_FTP_REMOTE_PATH_CONTAS }}/
+          server-dir: ${{ env.HOSTINGER_FTP_REMOTE_PATH }}/
           dangerous-clean-slate: true
