@@ -3,8 +3,10 @@ import { Toaster } from "react-hot-toast";
 import "./globals.css";
 
 /**
- * Mesmo critério do `next.config.ts`: em produção (ex.: /contas) o favicon precisa do prefixo,
- * senão o browser pede `/icon.png` na raiz do domínio e não encontra o arquivo.
+ * Favicon: use `app/favicon.ico` com o PNG da marca (Next 16 gera o primeiro `<link rel="icon">` a partir dele).
+ * Não usar `app/icon.png` em paralelo — o build gerava um segundo `.ico` pequeno e o browser ficava com o ícone antigo.
+ *
+ * Com deploy em subpasta (ex.: /contas), `NEXT_PUBLIC_BASE_PATH` deve coincidir com o `basePath` do `next.config.ts`.
  */
 const basePath = (process.env.NEXT_PUBLIC_BASE_PATH || "").replace(/\/$/, "");
 
@@ -13,7 +15,7 @@ export const metadata: Metadata = {
   description: "HIDRUS Serviços Gerais — portal de segunda via de conta e consumo.",
   icons: {
     icon: [
-      { url: `${basePath}/icon.png`, type: "image/png", sizes: "any" },
+      { url: `${basePath}/favicon.ico`, sizes: "any" },
       { url: `${basePath}/favicon.png`, type: "image/png", sizes: "any" },
     ],
     apple: { url: `${basePath}/apple-icon.png`, type: "image/png" },
