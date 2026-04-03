@@ -61,6 +61,15 @@ jobs:
           cache: npm
           cache-dependency-path: package-lock.json
 
+      # Acelera `next build` entre runs: o Next reutiliza o que ainda é válido (mesmo lockfile).
+      - name: Cache Next.js compiler
+        uses: actions/cache@v4
+        with:
+          path: .next/cache
+          key: ${{ runner.os }}-next-cache-${{ hashFiles('package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-next-cache-
+
       - name: Install & build
         env:
           NEXT_PUBLIC_API_URL: ${{ vars.NEXT_PUBLIC_API_URL }}
