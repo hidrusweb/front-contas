@@ -1,7 +1,7 @@
 import { Suspense } from 'react';
-import RedefinirSenhaClient from './RedefinirSenhaClient';
+import PrimeiroAcessoClient from './PrimeiroAcessoClient';
 
-export default function RedefinirSenhaPage() {
+export default function PrimeiroAcessoPage() {
   return (
     <Suspense
       fallback={
@@ -10,7 +10,7 @@ export default function RedefinirSenhaPage() {
         </div>
       }
     >
-      <RedefinirSenhaClient />
+      <PrimeiroAcessoClient />
     </Suspense>
   );
 }

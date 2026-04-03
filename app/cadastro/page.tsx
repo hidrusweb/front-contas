@@ -60,7 +60,9 @@ export default function CadastroPage() {
   };
 
   const selectUnit = (unidadeId: number) => {
-    router.push(`/primeiro-acesso/${unidadeId}?cpf=${encodeURIComponent(cpf)}`);
+    router.push(
+      `/primeiro-acesso?idUnidade=${unidadeId}&cpf=${encodeURIComponent(cpf)}`
+    );
   };
 
   return (

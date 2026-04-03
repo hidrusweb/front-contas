@@ -1,12 +1,12 @@
 'use client';
 
-import { use, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import toast from 'react-hot-toast';
-import api from '../../../lib/api';
+import api from '../../lib/api';
 
 const schema = z.object({
   senha: z.string().min(6, 'Mínimo 6 caracteres'),
@@ -18,14 +18,10 @@ const schema = z.object({
 
 type FormData = z.infer<typeof schema>;
 
-interface Props {
-  params: Promise<{ idUnidade: string }>;
-  searchParams: Promise<{ cpf?: string }>;
-}
-
-export default function PrimeiroAcessoPage({ params, searchParams }: Props) {
-  const { idUnidade } = use(params);
-  const { cpf } = use(searchParams);
+export default function PrimeiroAcessoClient() {
+  const searchParams = useSearchParams();
+  const idUnidade = searchParams.get('idUnidade') ?? '';
+  const cpf = searchParams.get('cpf') ?? '';
   const router = useRouter();
 
   const {
@@ -43,8 +39,9 @@ export default function PrimeiroAcessoPage({ params, searchParams }: Props) {
       });
       toast.success('Cadastro realizado! Faça login.');
       router.push('/login');
-    } catch (err: any) {
-      toast.error(err.response?.data?.message || 'Erro ao criar acesso');
+    } catch (err: unknown) {
+      const ax = err as { response?: { data?: { message?: string } } };
+      toast.error(ax.response?.data?.message || 'Erro ao criar acesso');
     }
   };
 
@@ -53,7 +50,7 @@ export default function PrimeiroAcessoPage({ params, searchParams }: Props) {
       <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-8">
         <h1 className="text-xl font-bold text-gray-800 mb-2">Criar Acesso</h1>
         <p className="text-gray-500 text-sm mb-6">
-          Defina uma senha para seu primeiro acesso à unidade #{idUnidade}.
+          Defina uma senha para seu primeiro acesso à unidade #{idUnidade || '—'}.
         </p>
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">

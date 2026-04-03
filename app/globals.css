@@ -55,3 +55,42 @@ body {
   padding: 1.5rem;
 }
 
+/* Conta do condômino — impressão em uma folha A4 */
+@media print {
+  @page {
+    size: A4 portrait;
+    margin: 8mm;
+  }
+  body {
+    background: #fff !important;
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
+  .demonstrativo-print-root {
+    font-size: 8.5px;
+    line-height: 1.2;
+    min-height: 0 !important;
+  }
+  .demonstrativo-print-root .print-a4-tight {
+    margin-bottom: 0.35rem !important;
+    padding: 0.35rem 0.5rem !important;
+  }
+  .demonstrativo-print-root .print-table-compact th,
+  .demonstrativo-print-root .print-table-compact td {
+    padding: 2px 4px !important;
+    font-size: 7.5px !important;
+    line-height: 1.15 !important;
+  }
+  .demonstrativo-print-root .print-chart-h {
+    height: 4.5rem !important;
+    max-height: 4.5rem !important;
+  }
+  .demonstrativo-print-root .print-photo-max {
+    max-height: 5rem !important;
+  }
+  .demonstrativo-print-root .print-keep-together {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+}
+

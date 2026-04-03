@@ -35,10 +35,15 @@ export default function LoginPage() {
       const token: string =
         res.data.accessToken ?? res.data.token ?? res.data.access_token ?? res.data;
       localStorage.setItem('contas_token', token);
-      router.push('/');
+      router.push('/inicio');
     } catch (err: any) {
-      const msg = err.response?.data?.message || 'Credenciais inválidas';
-      toast.error(msg);
+      const msg =
+        err.response?.data?.message ||
+        (err.code === 'ERR_NETWORK'
+          ? 'Não foi possível contactar a API (CORS ou URL). Confira NEXT_PUBLIC_API_URL e config/cors no Laravel.'
+          : err.message) ||
+        'Credenciais inválidas';
+      toast.error(typeof msg === 'string' ? msg : 'Credenciais inválidas');
     } finally {
       setLoading(false);
     }
