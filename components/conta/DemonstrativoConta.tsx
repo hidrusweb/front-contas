@@ -197,9 +197,9 @@ export default function DemonstrativoConta({ bill, anoRef, mesRef }: Props) {
         <div className="flex flex-wrap items-center justify-between gap-4 mb-5 print-a4-tight print:mb-2">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
-            src="/images/logo-hydrus.png"
-            alt="Hidrus Serviços Gerais"
-            className="h-12 sm:h-14 w-auto max-w-[min(100%,220px)] object-contain object-left print:h-10"
+            src="/images/logo-hydrus-horizontal.png"
+            alt="HIDRUS Serviços Gerais"
+            className="h-12 sm:h-14 w-auto max-w-[min(100%,260px)] object-contain object-left print:h-10"
           />
           <div className="text-right">
             <p className="text-xs font-medium uppercase tracking-wider text-cyan-600">Segunda via</p>
