@@ -1,0 +1,9 @@
+# Hostinger / Apache: export estático Next com pastas `rota/index.html`.
+# - Options -Indexes evita 403 ao pedir uma pasta sem índice (em configs antigas).
+# - DirectoryIndex faz o Apache servir index.html dentro de cada pasta de rota.
+
+Options -Indexes
+
+<IfModule mod_dir.c>
+  DirectoryIndex index.html
+</IfModule>
