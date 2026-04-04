@@ -59,7 +59,7 @@ export default function LoginPage() {
             alt="HIDRUS Soluções Integradas"
             className="mx-auto h-16 w-auto max-w-[min(100%,320px)] object-contain mb-4"
           />
-          <h1 className="text-xl font-bold text-slate-800 tracking-tight">HIDRUS</h1>
+          {/* <h1 className="text-xl font-bold text-slate-800 tracking-tight">HIDRUS</h1> */}
           <p className="text-slate-500 text-sm mt-1">Área do Condômino</p>
         </div>
 
