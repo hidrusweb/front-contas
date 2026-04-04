@@ -148,6 +148,12 @@ export default function DemonstrativoConta({ bill, anoRef, mesRef }: Props) {
     });
   }, [bill.Historico]);
 
+  /** Mesma ordem do histórico, do mês mais recente para o mais antigo (lista “Histórico recente”). */
+  const historicoRecentePrimeiro = useMemo(
+    () => [...historicoOrdenado].reverse(),
+    [historicoOrdenado],
+  );
+
   const { chartMin, chartMax, chartSpan, maxConsumoHist, minConsumoHist } = useMemo(() => {
     const vals = historicoOrdenado.map((x) => Number(x.ConsumoDoMes));
     if (vals.length === 0) {
@@ -198,8 +204,8 @@ export default function DemonstrativoConta({ bill, anoRef, mesRef }: Props) {
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src="/images/logo-hydrus-horizontal.png"
-            alt="HIDRUS Serviços Gerais"
-            className="h-12 sm:h-14 w-auto max-w-[min(100%,260px)] object-contain object-left print:h-10"
+            alt="HIDRUS Soluções Integradas"
+            className="h-14 sm:h-16 w-auto max-w-[min(100%,300px)] object-contain object-left print:h-12"
           />
           <div className="text-right">
             <p className="text-xs font-medium uppercase tracking-wider text-cyan-600">Segunda via</p>
@@ -258,8 +264,13 @@ export default function DemonstrativoConta({ bill, anoRef, mesRef }: Props) {
                     <div className="mt-1 font-semibold text-slate-900 tabular-nums">{bill.LeituraAtual}</div>
                   </div>
                   <div className="rounded-lg bg-slate-50 py-2 px-1 ring-1 ring-slate-100">
-                    <div className="text-slate-500 leading-tight">Próxima</div>
-                    <div className="mt-1 font-semibold text-slate-900">{fmtDay(bill.DataProximaLeitura)}</div>
+                    <div className="text-slate-500 leading-tight">Próxima leitura</div>
+                    <div className="text-[10px] text-slate-400" aria-hidden>
+                      {'\u00a0'}
+                    </div>
+                    <div className="mt-1 font-semibold text-slate-900 tabular-nums">
+                      {fmtDay(bill.DataProximaLeitura)}
+                    </div>
                   </div>
                 </div>
               </div>
@@ -377,7 +388,7 @@ export default function DemonstrativoConta({ bill, anoRef, mesRef }: Props) {
           </h4>
           <div className="grid md:grid-cols-2 gap-5 print:grid-cols-2 print:gap-2">
             <ul className="space-y-0 border-l-2 border-cyan-200/80 ml-1 pl-4 print:pl-2 print:ml-0">
-              {historicoOrdenado.map((h) => {
+              {historicoRecentePrimeiro.map((h) => {
                 const ativo = h.AnoLeitura === anoRef && h.MesLeitura === mesRef;
                 const c = Number(h.ConsumoDoMes);
                 const labelMes = [
