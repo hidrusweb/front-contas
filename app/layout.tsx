@@ -12,7 +12,7 @@ const basePath = (process.env.NEXT_PUBLIC_BASE_PATH || "").replace(/\/$/, "");
 
 export const metadata: Metadata = {
   title: "HIDRUS — Área do Condômino",
-  description: "HIDRUS Serviços Gerais — portal de segunda via de conta e consumo.",
+  description: "HIDRUS Soluções Integradas — portal de segunda via de conta e consumo.",
   icons: {
     icon: [
       { url: `${basePath}/favicon.ico`, sizes: "any" },

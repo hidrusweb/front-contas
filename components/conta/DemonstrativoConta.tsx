@@ -198,7 +198,7 @@ export default function DemonstrativoConta({ bill, anoRef, mesRef }: Props) {
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src="/images/logo-hydrus-horizontal.png"
-            alt="HIDRUS Serviços Gerais"
+            alt="HIDRUS Soluções Integradas"
             className="h-12 sm:h-14 w-auto max-w-[min(100%,260px)] object-contain object-left print:h-10"
           />
           <div className="text-right">

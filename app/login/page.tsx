@@ -56,7 +56,7 @@ export default function LoginPage() {
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src="/images/logo-hydrus-horizontal.png"
-            alt="HIDRUS Serviços Gerais"
+            alt="HIDRUS Soluções Integradas"
             className="mx-auto h-16 w-auto max-w-[min(100%,320px)] object-contain mb-4"
           />
           <h1 className="text-xl font-bold text-slate-800 tracking-tight">HIDRUS</h1>
