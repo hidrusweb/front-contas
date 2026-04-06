@@ -1,11 +1,11 @@
 'use client';
 
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import toast from 'react-hot-toast';
 import api from '../../lib/api';
-import { getUser, logout } from '../../lib/auth';
+import { getUser, logout, type JwtPayload } from '../../lib/auth';
 
 interface Unidade {
   id: number;
@@ -39,7 +39,8 @@ const MESES: { value: number; label: string }[] = [
 
 export default function InicioPage() {
   const router = useRouter();
-  const user = getUser();
+  /** undefined = ainda não leu localStorage (alinha hidratação com HTML estático do export). */
+  const [session, setSession] = useState<JwtPayload | null | undefined>(undefined);
   const [greeting, setGreeting] = useState('');
   const [unidades, setUnidades] = useState<Unidade[]>([]);
   const [loading, setLoading] = useState(true);
@@ -97,13 +98,18 @@ export default function InicioPage() {
     }
   }, []);
 
+  useLayoutEffect(() => {
+    setSession(getUser());
+  }, []);
+
   useEffect(() => {
-    if (!getUser()) {
+    if (session === undefined) return;
+    if (session === null) {
       router.replace('/login');
       return;
     }
     load();
-  }, [router, load]);
+  }, [router, load, session]);
 
   const onGerarConta = async () => {
     const uid = Number(idUnidade);
@@ -139,7 +145,7 @@ export default function InicioPage() {
     }
   };
 
-  if (!user) {
+  if (session === undefined || session === null) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-600 to-blue-900 text-white">
         Carregando…
