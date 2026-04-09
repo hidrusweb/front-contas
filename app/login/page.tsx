@@ -7,6 +7,7 @@ import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import toast from 'react-hot-toast';
 import api from '../../lib/api';
+import { setToken } from '../../lib/auth';
 
 const schema = z.object({
   emailCpf: z.string().min(1, 'Informe e-mail ou CPF'),
@@ -14,6 +15,24 @@ const schema = z.object({
 });
 
 type FormData = z.infer<typeof schema>;
+
+function extractToken(data: unknown): string | null {
+  if (typeof data === 'string' && data.trim()) return data;
+  if (!data || typeof data !== 'object') return null;
+  const src = data as Record<string, unknown>;
+  const candidates = [
+    src.accessToken,
+    src.access_token,
+    src.token,
+    src.Token,
+    src.jwt,
+    src.JWT,
+  ];
+  for (const c of candidates) {
+    if (typeof c === 'string' && c.trim()) return c;
+  }
+  return null;
+}
 
 export default function LoginPage() {
   const router = useRouter();
@@ -32,9 +51,12 @@ export default function LoginPage() {
         emailCpf: data.emailCpf,
         senha: data.senha,
       });
-      const token: string =
-        res.data.accessToken ?? res.data.token ?? res.data.access_token ?? res.data;
-      localStorage.setItem('contas_token', token);
+      const token = extractToken(res.data);
+      if (!token) {
+        toast.error('Resposta de login inválida: token ausente.');
+        return;
+      }
+      setToken(token);
       router.push('/inicio');
     } catch (err: any) {
       const msg =

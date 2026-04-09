@@ -10,6 +10,45 @@ export interface JwtPayload {
   iat: number;
 }
 
+const TOKEN_STORAGE_KEY = 'contas_token';
+const LEGACY_TOKEN_KEYS = ['token', 'access_token', 'accessToken'] as const;
+
+export function setToken(token: string): void {
+  if (typeof window === 'undefined') return;
+  localStorage.setItem(TOKEN_STORAGE_KEY, token);
+}
+
+export function clearToken(): void {
+  if (typeof window === 'undefined') return;
+  localStorage.removeItem(TOKEN_STORAGE_KEY);
+  for (const key of LEGACY_TOKEN_KEYS) {
+    localStorage.removeItem(key);
+    sessionStorage.removeItem(key);
+  }
+}
+
+export function getToken(): string | null {
+  if (typeof window === 'undefined') return null;
+
+  const stored = localStorage.getItem(TOKEN_STORAGE_KEY);
+  if (stored) return stored;
+
+  const legacy = LEGACY_TOKEN_KEYS.map((k) => localStorage.getItem(k)).find((v) => !!v);
+  if (legacy) {
+    localStorage.setItem(TOKEN_STORAGE_KEY, legacy);
+    return legacy;
+  }
+
+  const fromSession = [TOKEN_STORAGE_KEY, ...LEGACY_TOKEN_KEYS]
+    .map((k) => sessionStorage.getItem(k))
+    .find((v) => !!v);
+  if (fromSession) {
+    localStorage.setItem(TOKEN_STORAGE_KEY, fromSession);
+    return fromSession;
+  }
+  return null;
+}
+
 export function parseJwt(token: string): JwtPayload | null {
   try {
     const base64 = token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
@@ -26,18 +65,17 @@ export function parseJwt(token: string): JwtPayload | null {
 }
 
 export function getUser(): JwtPayload | null {
-  if (typeof window === 'undefined') return null;
-  const token = localStorage.getItem('contas_token');
+  const token = getToken();
   if (!token) return null;
   const payload = parseJwt(token);
   if (!payload) return null;
   if (Date.now() / 1000 > payload.exp) {
-    localStorage.removeItem('contas_token');
+    clearToken();
     return null;
   }
   return payload;
 }
 
 export function logout(): void {
-  if (typeof window !== 'undefined') localStorage.removeItem('contas_token');
+  clearToken();
 }

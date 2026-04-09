@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { clearToken, getToken } from './auth';
 
 const api = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8080/api',
@@ -25,7 +26,7 @@ function isPublicAccountPath(url: string | undefined): boolean {
 
 if (typeof window !== 'undefined') {
   api.interceptors.request.use((config) => {
-    const token = localStorage.getItem('contas_token');
+    const token = getToken();
     const path = config.url ?? '';
     if (token && !isPublicAccountPath(path)) {
       config.headers.Authorization = `Bearer ${token}`;
@@ -37,7 +38,7 @@ if (typeof window !== 'undefined') {
     (res) => res,
     (error) => {
       if (error.response?.status === 401) {
-        localStorage.removeItem('contas_token');
+        clearToken();
         const prefix = process.env.NEXT_PUBLIC_BASE_PATH || "";
         window.location.href = `${prefix}/login`;
       }
