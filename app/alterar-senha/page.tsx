@@ -81,7 +81,7 @@ export default function AlterarSenhaPage() {
             <div className="flex gap-2">
               <input
                 className="input"
-                placeholder="seu@email.com ou 000.000.000-00"
+                placeholder=""
                 disabled={step === 'change'}
                 {...register('emailCpf')}
               />

@@ -90,7 +90,7 @@ export default function LoginPage() {
             <label className="label">E-mail ou CPF</label>
             <input
               autoComplete="username"
-              placeholder="seu@email.com ou 000.000.000-00"
+              placeholder=""
               className="input"
               {...register('emailCpf')}
             />
