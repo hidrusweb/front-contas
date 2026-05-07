@@ -220,7 +220,6 @@ export default function DemonstrativoConta({ bill, anoRef, mesRef }: Props) {
           <div className="bg-gradient-to-br from-slate-50 via-white to-slate-50/30 px-5 py-4 border-b border-slate-100 print-a4-tight">
             <div className="flex flex-wrap items-start justify-between gap-3">
               <div>
-                <p className="text-sm font-medium text-slate-500 print:text-base">Condomínio</p>
                 <h2 className="text-xl font-semibold text-slate-900 leading-tight print:text-2xl">{condoNome || '—'}</h2>
               </div>
               <span className="shrink-0 inline-flex items-center rounded-full bg-cyan-50 text-cyan-800 px-3 py-1 text-sm font-medium ring-1 ring-cyan-100">
@@ -229,13 +228,11 @@ export default function DemonstrativoConta({ bill, anoRef, mesRef }: Props) {
             </div>
             <div className="mt-3 grid grid-cols-1 sm:grid-cols-[minmax(0,1fr)_auto] gap-x-4 gap-y-1 text-base text-slate-600 w-full print:text-lg">
               <span className="min-w-0">
-                <span className="text-slate-400">Condômino</span>{' '}
                 <span className="font-medium text-slate-800">
                   {(bill.NomeCondomino ?? '—').replace(/"/g, '')}
                 </span>
               </span>
               <span className="text-right tabular-nums">
-                <span className="text-slate-400">Hidrômetro</span>{' '}
                 <span className="font-medium text-slate-800">{bill.Hidrometro ?? '—'}</span>
               </span>
             </div>
