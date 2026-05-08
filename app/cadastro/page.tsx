@@ -2,16 +2,18 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { useForm } from 'react-hook-form';
+import { Controller, useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
-import toast from 'react-hot-toast';
+import { toast } from 'sonner';
 import api from '../../lib/api';
-
-const cpfRegex = /^\d{3}\.\d{3}\.\d{3}-\d{2}$/;
+import { cpfDigitsOnly, maskCpfInput } from '../../lib/cpf-mask';
 
 const schema = z.object({
-  cpf: z.string().regex(cpfRegex, 'CPF inválido. Formato: 000.000.000-00'),
+  cpf: z
+    .string()
+    .min(1, 'Informe o CPF')
+    .refine((s) => cpfDigitsOnly(s).length === 11, 'CPF incompleto'),
 });
 
 type FormData = z.infer<typeof schema>;
@@ -31,17 +33,25 @@ export default function CadastroPage() {
   const [step, setStep] = useState<'cpf' | 'units'>('cpf');
 
   const {
-    register,
+    control,
     handleSubmit,
     watch,
     formState: { errors },
-  } = useForm<FormData>({ resolver: zodResolver(schema) });
+  } = useForm<FormData>({ resolver: zodResolver(schema), defaultValues: { cpf: '' } });
 
   const cpf = watch('cpf');
 
   const onSubmitCpf = async (data: FormData) => {
     setLoading(true);
     try {
+      const { data: existData } = await api.get<{ hasEmailCpf?: boolean }>('/account/exists/common', {
+        params: { emailCpf: data.cpf },
+      });
+      if (existData?.hasEmailCpf) {
+        toast.error('Este CPF já possui cadastro. Faça login ou use "Esqueci minha senha".');
+        return;
+      }
+
       const res = await api.get('/Unit/condomino/disponiveis', {
         params: { emailCpf: data.cpf },
       });
@@ -52,14 +62,16 @@ export default function CadastroPage() {
       }
       setUnidades(list);
       setStep('units');
-    } catch (err: any) {
-      toast.error(err.response?.data?.message || 'CPF não encontrado');
+    } catch (err: unknown) {
+      const ax = err as { response?: { data?: { message?: string } } };
+      toast.error(ax.response?.data?.message || 'CPF não encontrado');
     } finally {
       setLoading(false);
     }
   };
 
   const selectUnit = (unidadeId: number) => {
+    toast.dismiss();
     router.push(
       `/primeiro-acesso?idUnidade=${unidadeId}&cpf=${encodeURIComponent(cpf)}`
     );
@@ -79,10 +91,24 @@ export default function CadastroPage() {
           <form onSubmit={handleSubmit(onSubmitCpf)} className="space-y-4">
             <div>
               <label className="label">CPF *</label>
-              <input
-                className="input"
-                placeholder="000.000.000-00"
-                {...register('cpf')}
+              <Controller
+                name="cpf"
+                control={control}
+                render={({ field }) => (
+                  <input
+                    type="text"
+                    inputMode="numeric"
+                    autoComplete="off"
+                    className="input"
+                    placeholder="000.000.000-00"
+                    maxLength={14}
+                    name={field.name}
+                    ref={field.ref}
+                    onBlur={field.onBlur}
+                    value={field.value}
+                    onChange={(e) => field.onChange(maskCpfInput(e.target.value))}
+                  />
+                )}
               />
               {errors.cpf && <p className="text-red-500 text-xs mt-1">{errors.cpf.message}</p>}
             </div>

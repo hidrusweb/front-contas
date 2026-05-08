@@ -1,15 +1,15 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
 import api from '../../lib/api';
 import { getUser } from '../../lib/auth';
-import toast from 'react-hot-toast';
+import { toast } from 'sonner';
+import { hardNavigateToAppPath } from '../../lib/defer-client-navigation';
 import DemonstrativoConta, { type UnitBill } from '../../components/conta/DemonstrativoConta';
 
 export default function VisualizacaoClient() {
   const searchParams = useSearchParams();
-  const router = useRouter();
   const tabelaId = searchParams.get('tabelaId') ?? '';
   const ano = searchParams.get('ano') ?? '';
   const mes = searchParams.get('mes') ?? '';
@@ -23,7 +23,7 @@ export default function VisualizacaoClient() {
 
   useEffect(() => {
     if (!getUser()) {
-      router.push('/login');
+      hardNavigateToAppPath('/login');
       return;
     }
 
@@ -50,7 +50,7 @@ export default function VisualizacaoClient() {
     };
 
     load();
-  }, [router, idUnidade, tabelaId, ano, mes]);
+  }, [idUnidade, tabelaId, ano, mes]);
 
   const monthNames = [
     'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
@@ -64,7 +64,10 @@ export default function VisualizacaoClient() {
         <div className="max-w-3xl mx-auto px-4 py-3 flex items-center justify-between gap-4">
           <button
             type="button"
-            onClick={() => router.push('/inicio')}
+            onClick={() => {
+              toast.dismiss();
+              hardNavigateToAppPath('/inicio');
+            }}
             className="text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors"
           >
             ← Voltar

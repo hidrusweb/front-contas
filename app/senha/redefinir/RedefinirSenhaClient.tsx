@@ -1,11 +1,12 @@
 'use client';
 
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
-import toast from 'react-hot-toast';
+import { toast } from 'sonner';
 import api from '../../../lib/api';
+import { hardNavigateToAppPath } from '../../../lib/defer-client-navigation';
 
 const schema = z.object({
   novaSenha: z.string().min(6, 'Mínimo 6 caracteres'),
@@ -22,7 +23,6 @@ export default function RedefinirSenhaClient() {
   const urlKey = searchParams.get('urlKey') ?? undefined;
   const tokenQ = searchParams.get('token') ?? undefined;
   const emailQ = searchParams.get('email') ?? undefined;
-  const router = useRouter();
 
   const {
     register,
@@ -45,7 +45,7 @@ export default function RedefinirSenhaClient() {
         password_confirmation: data.novaSenha,
       });
       toast.success('Senha redefinida! Faça login.');
-      router.push('/login');
+      hardNavigateToAppPath('/login', 400);
     } catch (err: unknown) {
       const ax = err as { response?: { data?: { message?: string } } };
       toast.error(ax.response?.data?.message || 'Token inválido ou expirado');

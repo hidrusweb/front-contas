@@ -1,11 +1,11 @@
 'use client';
 
 import { useCallback, useEffect, useLayoutEffect, useMemo, useState } from 'react';
-import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import toast from 'react-hot-toast';
+import { toast } from 'sonner';
 import api from '../../lib/api';
 import { getUser, logout, type JwtPayload } from '../../lib/auth';
+import { hardNavigateToAppPath } from '../../lib/defer-client-navigation';
 
 interface Unidade {
   id: number;
@@ -38,7 +38,6 @@ const MESES: { value: number; label: string }[] = [
 ];
 
 export default function InicioPage() {
-  const router = useRouter();
   /** undefined = ainda não leu localStorage (alinha hidratação com HTML estático do export). */
   const [session, setSession] = useState<JwtPayload | null | undefined>(undefined);
   const [greeting, setGreeting] = useState('');
@@ -105,22 +104,22 @@ export default function InicioPage() {
   useEffect(() => {
     if (session === undefined) return;
     if (session === null) {
-      router.replace('/login');
+      hardNavigateToAppPath('/login');
       return;
     }
     load();
-  }, [router, load, session]);
+  }, [load, session]);
 
   const onGerarConta = async () => {
     const uid = Number(idUnidade);
     const y = Number(ano);
     const m = Number(mes);
     if (!Number.isFinite(uid) || uid <= 0) {
-      toast('Selecione uma unidade válida.', { icon: '⚠️' });
+      toast.warning('Selecione uma unidade válida.');
       return;
     }
     if (!Number.isFinite(y) || !Number.isFinite(m)) {
-      toast('Selecione ano e mês.', { icon: '⚠️' });
+      toast.warning('Selecione ano e mês.');
       return;
     }
     setGerando(true);
@@ -134,8 +133,11 @@ export default function InicioPage() {
         toast.error('Período sem tabela de impostos configurada.');
         return;
       }
-      router.push(
-        `/visualizacao?tabelaId=${idTabela}&ano=${y}&mes=${m}&idUnidade=${uid}`
+      toast.dismiss();
+      hardNavigateToAppPath(
+        '/visualizacao',
+        0,
+        `tabelaId=${encodeURIComponent(String(idTabela))}&ano=${y}&mes=${m}&idUnidade=${uid}`
       );
     } catch (err: unknown) {
       const ax = err as { response?: { data?: { message?: string } } };
@@ -236,8 +238,9 @@ export default function InicioPage() {
           <button
             type="button"
             onClick={() => {
+              toast.dismiss();
               logout();
-              router.push('/login');
+              hardNavigateToAppPath('/login');
             }}
             className="text-sm text-gray-600 hover:text-gray-900 font-medium"
           >

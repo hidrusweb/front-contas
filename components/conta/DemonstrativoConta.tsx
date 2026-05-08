@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 
 /** Resposta de GET /reports/bill/unidade/{id} (paridade com UnitBillViewModel + ReportsService Laravel). */
 export interface UnitBill {
@@ -89,6 +89,34 @@ function formatM3Tick(v: number): string {
   return v.toFixed(1).replace(/\.0$/, '');
 }
 
+function ReadingImageInner({
+  src,
+  maxHeightClass,
+}: {
+  src: string;
+  maxHeightClass: string;
+}) {
+  const [broken, setBroken] = useState(false);
+  const showImage = !broken;
+
+  return showImage ? (
+    // eslint-disable-next-line @next/next/no-img-element
+    <img
+      src={src}
+      alt="Registro da leitura do hidrômetro"
+      className={`max-w-full object-contain rounded-xl ring-1 ring-slate-200 print-photo-max print:max-h-[8.5rem] ${maxHeightClass}`}
+      onError={() => setBroken(true)}
+    />
+  ) : (
+    <div className="w-full h-40 rounded-xl bg-slate-100 flex flex-col items-center justify-center gap-1 px-3 text-center print:h-16 print:gap-0 print:px-2">
+      <p className="text-sm font-medium text-slate-600 print:text-xs">Sem imagem</p>
+      <p className="text-xs text-slate-500 leading-snug print:text-[11px] print:leading-snug">
+        Não há foto cadastrada ou a imagem não pôde ser carregada.
+      </p>
+    </div>
+  );
+}
+
 function ReadingImageSlot({
   src,
   maxHeightClass,
@@ -96,23 +124,10 @@ function ReadingImageSlot({
   src: string | null;
   maxHeightClass: string;
 }) {
-  const [broken, setBroken] = useState(false);
-  useEffect(() => {
-    setBroken(false);
-  }, [src]);
-
-  const showImage = Boolean(src) && !broken;
-
   return (
     <div className="flex items-center justify-center min-h-[160px] print:min-h-0 w-full">
-      {showImage ? (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img
-          src={src!}
-          alt="Registro da leitura do hidrômetro"
-          className={`max-w-full object-contain rounded-xl ring-1 ring-slate-200 print-photo-max print:max-h-[8.5rem] ${maxHeightClass}`}
-          onError={() => setBroken(true)}
-        />
+      {src ? (
+        <ReadingImageInner key={src} src={src} maxHeightClass={maxHeightClass} />
       ) : (
         <div className="w-full h-40 rounded-xl bg-slate-100 flex flex-col items-center justify-center gap-1 px-3 text-center print:h-16 print:gap-0 print:px-2">
           <p className="text-sm font-medium text-slate-600 print:text-xs">Sem imagem</p>

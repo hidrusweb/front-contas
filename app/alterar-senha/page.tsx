@@ -1,12 +1,12 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
-import toast from 'react-hot-toast';
+import { toast } from 'sonner';
 import api from '../../lib/api';
+import { hardNavigateToAppPath } from '../../lib/defer-client-navigation';
 
 const schema = z.object({
   emailCpf: z.string().min(1, 'Informe e-mail ou CPF'),
@@ -21,7 +21,6 @@ const schema = z.object({
 type FormData = z.infer<typeof schema>;
 
 export default function AlterarSenhaPage() {
-  const router = useRouter();
   const [step, setStep] = useState<'validate' | 'change'>('validate');
   const [validatedUser, setValidatedUser] = useState('');
   const [checking, setChecking] = useState(false);
@@ -61,9 +60,10 @@ export default function AlterarSenhaPage() {
         novaSenha: data.novaSenha,
       });
       toast.success('Senha alterada com sucesso!');
-      router.push('/login');
-    } catch (err: any) {
-      toast.error(err.response?.data?.message || 'Erro ao alterar senha');
+      hardNavigateToAppPath('/login', 400);
+    } catch (err: unknown) {
+      const ax = err as { response?: { data?: { message?: string } } };
+      toast.error(ax.response?.data?.message || 'Erro ao alterar senha');
     }
   };
 
