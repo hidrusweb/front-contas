@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Toaster } from "react-hot-toast";
+import { AppToaster } from "./AppToaster";
 import "./globals.css";
 
 /**
@@ -31,7 +31,7 @@ export default function RootLayout({
     <html lang="pt-BR" className="h-full">
       <body className="min-h-full flex flex-col">
         {children}
-        <Toaster position="top-right" containerClassName="print:hidden" />
+        <AppToaster />
       </body>
     </html>
   );

@@ -1,12 +1,12 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
-import toast from 'react-hot-toast';
+import { toast } from 'sonner';
 import api from '../../lib/api';
+import { hardNavigateToAppPath } from '../../lib/defer-client-navigation';
 import { setToken } from '../../lib/auth';
 
 const schema = z.object({
@@ -35,7 +35,6 @@ function extractToken(data: unknown): string | null {
 }
 
 export default function LoginPage() {
-  const router = useRouter();
   const [loading, setLoading] = useState(false);
 
   const {
@@ -57,13 +56,19 @@ export default function LoginPage() {
         return;
       }
       setToken(token);
-      router.push('/inicio');
-    } catch (err: any) {
+      toast.dismiss();
+      hardNavigateToAppPath('/inicio', 0);
+    } catch (err: unknown) {
+      const ax = err as {
+        response?: { data?: { message?: string } };
+        code?: string;
+        message?: string;
+      };
       const msg =
-        err.response?.data?.message ||
-        (err.code === 'ERR_NETWORK'
+        ax.response?.data?.message ||
+        (ax.code === 'ERR_NETWORK'
           ? 'Não foi possível contactar a API (CORS ou URL). Confira NEXT_PUBLIC_API_URL e config/cors no Laravel.'
-          : err.message) ||
+          : ax.message) ||
         'Credenciais inválidas';
       toast.error(typeof msg === 'string' ? msg : 'Credenciais inválidas');
     } finally {
@@ -117,9 +122,6 @@ export default function LoginPage() {
         <div className="mt-6 space-y-2 text-center text-sm">
           <a href="/cadastro" className="text-blue-600 hover:underline block">
             Primeiro acesso? Cadastre-se
-          </a>
-          <a href="/alterar-senha" className="text-gray-500 hover:underline block">
-            Alterar senha
           </a>
           <a href="/senha/esqueci" className="text-gray-500 hover:underline block">
             Esqueci minha senha
